@@ -9,6 +9,5 @@ class PlayState < GameState
 
   def button_down(id)
     $window.close if id == Gosu::KbQ
-    GameState.switch(MenuState.instance) if id == Gosu::KbEscape
   end
 end
