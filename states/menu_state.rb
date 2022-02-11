@@ -4,7 +4,7 @@ class MenuState < GameState
   attr_accessor :play_state
 
   def initialize
-    @headline_font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
+   @headline_font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
     @button_c = Button.new('', 110)
     @button_ng = Button.new('New game', 60)
     @button_l = Button.new('Load game', 0)
@@ -26,9 +26,10 @@ class MenuState < GameState
 
   def draw_background
     color = Gosu::Color.rgba(238, 238, 210, 255)
-    $window.draw_quad(0, 0, color, 800, 0, color, 0, 800, color, 800, 800, color, z = 1, mode = :default)
-    glyph = "\u265A"
-    @headline_font.draw_text(glyph, 10, 700, 10, 1, 1, Gosu::Color::BLACK)
+    width = $window.width
+    $window.draw_quad(0, 0, color, width, 0, color, 0, width, color, width, width, color, z = 1, mode = :default)
+    glyph = "♚"
+    @headline_font.draw_text(glyph, 20, 700, 10, 1, 1, Gosu::Color::BLACK)
   end
 
   def draw_buttons

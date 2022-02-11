@@ -1,6 +1,5 @@
 class Button
   attr_accessor :text
-
   def initialize(text, shift)
     @text = text
     @shift = shift
