@@ -28,7 +28,7 @@ class PlayState < GameState
   def button_up(id)
     if id == Gosu::MsLeft
       @to = get_idx
-      move unless @from.nil? || @to.nil?
+      move unless @from.nil? || @to.nil? || @from.piece == " "
     end
   end
 

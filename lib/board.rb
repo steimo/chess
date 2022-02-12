@@ -14,16 +14,28 @@ class Board
   end
 
   def initialize_board
-    board = %w[
-      r n b q k b n r
-      p p p p p p p p
-      - - - - - - - -
-      - - - - - - - -
-      - - - - - - - -
-      - - - - - - - -
-      P P P P P P P P
-      R N B Q K B N R
-    ].each_slice(8).to_a.map.with_index do |row, y|
+    # board = %w[
+    #   r n b q k b n r
+    #   p p p p p p p p
+    #   - - - - - - - -
+    #   - - - - - - - -
+    #   - - - - - - - -
+    #   - - - - - - - -
+    #   P P P P P P P P
+    #   R N B Q K B N R
+    # ].each_slice(8).to_a.map.with_index do |row, y|
+    #   row.map.with_index do |column, x| # column represents piece
+    #     Square.new(x, y, column)
+    #   end
+    # end
+    fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    position = fen.to_position
+    arr = []
+    arr << position.inspect
+    arr = arr[0].split("\n")
+    arr.shift
+    arr = arr.map {|sector| sector.chars}.flatten.map { |s| s == " " ? "" : s }.reject { |c| c.empty? }.map {|w| w == "_" ? " " : w}
+      arr.each_slice(8).to_a.map.with_index do |row, y|
       row.map.with_index do |column, x| # column represents piece
         Square.new(x, y, column)
       end
@@ -46,7 +58,7 @@ class Board
     end
   end
 
-   def update
+  def update
     @board.each_slice(8).to_a.each do |arr|
       arr.each.with_index do |row, _y|
         row.each.with_index do |column, _x|
@@ -54,7 +66,7 @@ class Board
         end
       end
     end
-   end
+  end
 
   # def move(from, to)
   #   piece = @board[from].piece
@@ -67,7 +79,7 @@ class Board
   # end
 
   def set_piece_at(from, to)
-    @board[from.y][from.x] = Square.new(from.x, from.y, "")
+    @board[from.y][from.x] = Square.new(from.x, from.y, '')
     @board[to.y][to.x] = Square.new(to.x, to.y, from.piece)
   end
 

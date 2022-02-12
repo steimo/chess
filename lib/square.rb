@@ -10,7 +10,7 @@ class Square
     @piece = piece
     # @piece = Piece.new(piece.to_sym)
     @width = 100
-    @font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
+    @font = Gosu::Font.new(80, name: 'fonts/chess_merida_unicode.ttf')
     @font_x = Gosu::Font.new(10, name: 'fonts/unifont-14.0.01.ttf')
   end
 
@@ -52,7 +52,8 @@ class Square
                       x, y + width, color)
     str = PIECES[piece] || ''
     cx = (width - font.text_width(str)) / 2
-    font.draw_text(piece, x + cx, y, 1, 1, 1, @color)
+    px = (width - font.text_width(piece)) / 2
+    font.draw_text(piece, x + px, y + 15, 1, 1, 1, @color)
     font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
   end
 
