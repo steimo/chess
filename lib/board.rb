@@ -1,9 +1,9 @@
 class Board
   # attr_accessor :board, :turn, :castling, :ep, :halfmove, :fullmove, :king
-  attr_accessor :board
+  attr_accessor :board, :fen
 
-  def initialize
-    # @fen = fen
+  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'))
+    @fen = fen
     @board = initialize_board
     @turn = :white
     # @castling = 'KQkq'
@@ -28,14 +28,16 @@ class Board
     #     Square.new(x, y, column)
     #   end
     # end
-    fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    # fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     position = fen.to_position
     arr = []
     arr << position.inspect
     arr = arr[0].split("\n")
     arr.shift
-    arr = arr.map {|sector| sector.chars}.flatten.map { |s| s == " " ? "" : s }.reject { |c| c.empty? }.map {|w| w == "_" ? " " : w}
-      arr.each_slice(8).to_a.map.with_index do |row, y|
+    arr = arr.map do |sector|
+            sector.chars
+          end.flatten.map { |s| s == ' ' ? '' : s }.reject { |c| c.empty? }.map { |w| w == '_' ? ' ' : w }
+    arr.each_slice(8).to_a.map.with_index do |row, y|
       row.map.with_index do |column, x| # column represents piece
         Square.new(x, y, column)
       end
@@ -68,24 +70,20 @@ class Board
     end
   end
 
-  # def move(from, to)
-  #   piece = @board[from].piece
-  #   @board[to] = Square.new(piece)
-  #   @board[from] = Square.new('')
+  # def set_piece_at(from, to)
+  #   @board[from.y][from.x] = Square.new(from.x, from.y, '')
+  #   @board[to.y][to.x] = Square.new(to.x, to.y, from.piece)
   # end
 
-  # def move_valid?(from, to)
-  #   true if !from.nil? && !to.nil? && from != to
-  # end
-
-  def set_piece_at(from, to)
-    @board[from.y][from.x] = Square.new(from.x, from.y, '')
-    @board[to.y][to.x] = Square.new(to.x, to.y, from.piece)
+  def create_fen(position)
+    piece = position.piece.to_s == 'P' || position.piece.to_s == 'p' ? '' : position.piece.to_s
+    move = "#{piece.capitalize}#{position.from.define_position}#{position.to.piece == " " ? '' : 'x'}#{position.to.define_position}"
+    puts move
+    position = @fen.to_position.move(move)
+    position.to_fen
   end
 
   def move(position)
-    board_next = Board.new
-    board_next.set_piece_at(position.from, position.to)
-    board_next
+    Board.new(create_fen(position))
   end
 end

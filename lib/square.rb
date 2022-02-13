@@ -19,11 +19,12 @@ class Square
   end
 
   def update
-    if mouse_over_square
-      @color = Gosu::Color.rgba(1, 210, 161, 254)
-    else
-      @color = Gosu::Color::BLACK
-    end
+    @color = if mouse_over_square
+               Gosu::Color.rgba(1, 210, 161, 254)
+             else
+               Gosu::Color::BLACK
+             end
+    # puts define_position if mouse_over_square
   end
 
   def x_input(x)
@@ -36,6 +37,17 @@ class Square
     return y if y.is_a?(Integer)
 
     y = y.ord - '1'.ord
+  end
+
+
+  def define_position # returns position on board
+  ('a'..'h').each.with_index do |col, i|
+    (1..8).each.with_index do |row, j|
+      y = 7 - @y
+      x = @x
+      return "#{col}#{row}" if i == x && j == y 
+    end
+  end
   end
 
   def draw

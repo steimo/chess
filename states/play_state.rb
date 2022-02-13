@@ -1,9 +1,8 @@
 class PlayState < GameState
   # attr_accessor :position, :from, :to
-  attr_accessor :fen, :board, :from, :to
+  attr_accessor :board, :from, :to
 
-  def initialize(fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', board = Board.new)
-    @fen = fen
+  def initialize(board = Board.new)
     @board = board
   end
 
@@ -16,7 +15,7 @@ class PlayState < GameState
   end
 
   def get_idx # returns square object
-     @board.board.flatten.detect { |sq| sq.mouse_over_square }
+    @board.board.flatten.detect { |sq| sq.mouse_over_square }
   end
 
   def button_down(id)
@@ -28,14 +27,14 @@ class PlayState < GameState
   def button_up(id)
     if id == Gosu::MsLeft
       @to = get_idx
-      move unless @from.nil? || @to.nil? || @from.piece == " "
+      move unless @from.nil? || @to.nil? || @from.piece == ' '
     end
   end
 
-  def move() # 'Pe2e4' 'Pe7e8Q'
+  def move # 'Pe2e4' 'Pe7e8Q'
     position = Position.new(@from, @to)
     nextBoard = @board.move(position)
-    nextPlayState = PlayState.new('safd ', nextBoard)
+    nextPlayState = PlayState.new(nextBoard)
     GameState.switch(nextPlayState)
   end
 
