@@ -76,7 +76,8 @@ class Board
   # end
 
   def create_fen(position)
-    piece = position.piece.to_s == 'P' || position.piece.to_s == 'p' ? '' : position.piece.to_s
+    puts position.to.piece
+    piece = position.piece_from.to_s == 'P' || position.piece_from.to_s == 'p' ? '' : position.piece_from.to_s
     move = "#{piece.capitalize}#{position.from.define_position}#{position.to.piece == " " ? '' : 'x'}#{position.to.define_position}"
     puts move
     position = @fen.to_position.move(move)

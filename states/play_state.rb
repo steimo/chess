@@ -33,9 +33,12 @@ class PlayState < GameState
 
   def move # 'Pe2e4' 'Pe7e8Q'
     position = Position.new(@from, @to)
-    nextBoard = @board.move(position)
-    nextPlayState = PlayState.new(nextBoard)
-    GameState.switch(nextPlayState)
+    move = Move.new(board, position)
+    if move.can_move
+      nextBoard = @board.move(position)
+      nextPlayState = PlayState.new(nextBoard)
+      GameState.switch(nextPlayState)
+    end
   end
 
   def get_piece_at(_x, _y)

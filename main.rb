@@ -12,6 +12,7 @@ require_relative 'lib/square'
 require_relative 'lib/piece'
 require_relative 'lib/player'
 require_relative 'lib/position'
+require_relative 'lib/move'
 require_relative 'lib/piece_on_square'
 include ChessHelper
 $window = Game.new
