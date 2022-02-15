@@ -21,3 +21,5 @@ class Integer
     (('a'.ord + self % 8).chr + ('8'.ord - self / 8).chr).to_sym
   end
 end
+    # x = position.from.define_position
+    # puts board.board.flatten[3].piece

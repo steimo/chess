@@ -36,14 +36,15 @@ class Move
       true if position.abs_delta_x <= 1 && position.abs_delta_y <= 1
     when 'N'
       if position.abs_delta_x == 1 && position.abs_delta_y == 2
+
         true
       elsif position.abs_delta_x == 2 && position.abs_delta_y == 1
         true
       else
         false
       end
-    when 'P'
-      true
+    when 'Q'
+      can_move_straight?
     end
   end
 
@@ -57,14 +58,20 @@ class Move
     %w[K k].include?(str)
   end
 
-  def can_move_straight
-    x = position.from.x
-    y = position.from.y
-    at = position.from
+  def can_move_straight?
+    id = position.from
+    at = board.board[id.y][id.x]
     loop do
-      at = Square.new(x + position.sign_x, y + position.sign_y, at.piece)
-      true if at == position.to
-      break if @board.board[at.x][at.y].piece == ' '
+      at = board.board[at.y + position.sign_y][at.x + position.sign_x]
+      if at == position.to
+        return true
+      elsif if at.instance_of?(NilClass)
+              return false
+            elsif at.y + position.sign_y >= 8
+              return false
+            end
+      end
+      break if at.piece != ' '
     end
   end
 

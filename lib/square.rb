@@ -25,7 +25,7 @@ class Square
                Gosu::Color::BLACK
              end
     # puts define_position if mouse_over_square
-     puts "x:#{x} y:#{y}" if mouse_over_square
+     # puts "x:#{@x} y:#{@y}" if mouse_over_square
   end
 
   def x_input(x)
@@ -75,4 +75,8 @@ class Square
     y = @y * width
     $window.mouse_x.between?(x, x + width - 2) && $window.mouse_y.between?(y, y + width - 2)
   end
+
+   def ==(other)
+     return self.x == other.x && self.y == other.y && self.piece == other.piece
+   end
 end
