@@ -2,7 +2,7 @@ class Board
   # attr_accessor :board, :turn, :castling, :ep, :halfmove, :fullmove, :king
   attr_accessor :board, :fen
 
-  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPP111PP/RNBQKBNR w KQkq - 0 1'))
+  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/111111PP/RNBQKBNR w KQkq - 0 1'))
     @fen = fen
     @board = initialize_board
     @turn = :white

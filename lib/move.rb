@@ -45,6 +45,10 @@ class Move
       end
     when 'Q'
       can_move_straight?
+    when 'R'
+      (position.sign_x == 0 || position.sign_y == 0) && can_move_straight?
+    when 'B'
+      (position.sign_x != 0 && position.sign_y != 0) && can_move_straight?
     end
   end
 
