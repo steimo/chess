@@ -4,21 +4,20 @@ module ChessHelper
       define_method("#{col}#{row}") { i + j * 8 }
     end
   end
+end
 
-  # class Array
-  #   def to_idx
-  #     self[0] + 1 + (self[1] + 2)*10
-  #   end
-  # end
-  # class String
-  #   def to_idx
-  #     self[0].ord - 'a'.ord + 1 + ('8'.ord - self[1].ord + 2)*10
-  #   end
-  # end
-  class Integer
-    def to_sq
-      (('a'.ord + self % 8).chr + ('8'.ord - self / 8).chr).to_sym
-    end
+class String
+  def pawn?
+    self == :P || self == :p
+  end
+
+  def king?
+    self == :K || self == :k
   end
 end
 
+class Integer
+  def to_sq
+    (('a'.ord + self % 8).chr + ('8'.ord - self / 8).chr).to_sym
+  end
+end

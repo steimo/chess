@@ -2,7 +2,7 @@ class Board
   # attr_accessor :board, :turn, :castling, :ep, :halfmove, :fullmove, :king
   attr_accessor :board, :fen
 
-  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'))
+  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPP111PP/RNBQKBNR w KQkq - 0 1'))
     @fen = fen
     @board = initialize_board
     @turn = :white
@@ -70,21 +70,12 @@ class Board
     end
   end
 
-  # def set_piece_at(from, to)
-  #   @board[from.y][from.x] = Square.new(from.x, from.y, '')
-  #   @board[to.y][to.x] = Square.new(to.x, to.y, from.piece)
-  # end
-
-  def create_fen(position)
-    puts position.to.piece
-    piece = position.piece_from.to_s == 'P' || position.piece_from.to_s == 'p' ? '' : position.piece_from.to_s
-    move = "#{piece.capitalize}#{position.from.define_position}#{position.to.piece == " " ? '' : 'x'}#{position.to.define_position}"
-    puts move
-    position = @fen.to_position.move(move)
-    position.to_fen
-  end
-
   def move(position)
-    Board.new(create_fen(position))
+    move = Move.new(self, position)
+    string = move.to_algebraic_notation_string
+    puts string
+    position = @fen.to_position.move(string.strip)
+    new = position.to_fen
+    Board.new(new)
   end
 end

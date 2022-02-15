@@ -20,16 +20,57 @@ class Move
   end
 
   def can_move_to
-    if position.piece_to == '' 
-      true
-    elsif piece_color(position.piece_to) != fen.active
+    if position.piece_to == ''
       true
     else
-      false
+      piece_color(position.piece_to) != fen.active
     end
   end
 
   def can_piece_move
-    true
+    piece = position.piece_from.to_s
+    from = position.from.define_position
+    to = position.to.define_position
+    case piece.upcase
+    when 'K'
+      true if position.abs_delta_x <= 1 && position.abs_delta_y <= 1
+    when 'N'
+      if position.abs_delta_x == 1 && position.abs_delta_y == 2
+        true
+      elsif position.abs_delta_x == 2 && position.abs_delta_y == 1
+        true
+      else
+        false
+      end
+    when 'P'
+      true
+    end
+  end
+
+  def pawn?
+    str = position.piece_from
+    %w[P p].include?(str)
+  end
+
+  def king?
+    str = position.piece_from
+    %w[K k].include?(str)
+  end
+
+  def can_move_straight
+    x = position.from.x
+    y = position.from.y
+    at = position.from
+    loop do
+      at = Square.new(x + position.sign_x, y + position.sign_y, at.piece)
+      true if at == position.to
+      break if @board.board[at.x][at.y].piece == ' '
+    end
+  end
+
+  def to_algebraic_notation_string
+    piece = position.piece_from
+    piece_str = pawn? ? '' : piece.upcase
+    "#{piece_str}#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}"
   end
 end

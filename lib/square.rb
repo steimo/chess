@@ -25,6 +25,7 @@ class Square
                Gosu::Color::BLACK
              end
     # puts define_position if mouse_over_square
+     puts "x:#{x} y:#{y}" if mouse_over_square
   end
 
   def x_input(x)
