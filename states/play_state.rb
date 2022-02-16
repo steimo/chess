@@ -1,9 +1,10 @@
 class PlayState < GameState
   # attr_accessor :position, :from, :to
-  attr_accessor :board, :from, :to
+  attr_accessor :board, :from, :to, :first_click
 
   def initialize(board = Board.new)
     @board = board
+    @first_click = true
   end
 
   def draw
@@ -21,16 +22,24 @@ class PlayState < GameState
   def button_down(id)
     $window.close if id == Gosu::KbQ
     GameState.switch(MenuState.instance) if id == Gosu::KbEscape
-    @from = get_idx if id == Gosu::MsLeft
-    find_all_moves if id == Gosu::MsRight
-  end
-
-  def button_up(id)
-    if id == Gosu::MsLeft
+    if first_click && get_idx.piece != ' ' && id == Gosu::MsLeft
+      @first_click = false
+      find_all_moves
+      @from = get_idx
+    elsif !first_click 
+      @toos = []
       @to = get_idx
       move unless @from.nil? || @to.nil? || @from.piece == ' '
+      @first_click = true
     end
   end
+
+  # def button_up(id)
+  #   if id == Gosu::MsLeft
+  #     @to = get_idx
+  #     move unless @from.nil? || @to.nil? || @from.piece == ' '
+  #   end
+  # end
 
   def find_all_moves
     all_moves = []
@@ -40,13 +49,18 @@ class PlayState < GameState
       all_squares_to.each do |to|
         position = Position.new(p.square, to)
         move = Move.new(board, position)
-        if move.can_move
-          all_moves << position
-        end
+        all_moves << position if move.can_move
       end
     end
+    curently_selected_sq = @board.board.flatten.detect { |m| m.mouse_over_square }
     all_moves.each do |move|
-      puts "#{move.from.piece}#{move.from.define_position}#{move.to.define_position}"
+      move.from.selected = true
+      @toos = []
+      @toos << move if curently_selected_sq.define_position == move.from.define_position
+      # puts "#{move.from.piece}#{move.from.define_position}#{move.to.define_position}"
+      @toos.map do |to|
+        to.to.to_selected = true
+      end
     end
   end
 

@@ -83,7 +83,9 @@ class Board
   def yield_squares
     result = []
     board.flatten.each do |square|
-      if square.piece == " "
+      if square.piece == " " 
+        result << square
+      elsif square.piece_color != fen.active 
         result << square
       end
     end

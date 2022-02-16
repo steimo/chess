@@ -2,7 +2,7 @@ class Square
   # attr_accessor :color, :piece, :selected
   PIECES = { R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚', p: '♟' }
   # attr_reader :width, :font
-  attr_accessor :x, :y, :piece, :width, :font, :font_x, :color
+  attr_accessor :x, :y, :piece, :width, :font, :font_x, :color, :selected, :to_selected
 
   def initialize(x, y, piece)
     @x = x_input(x)
@@ -12,6 +12,8 @@ class Square
     @width = 100
     @font = Gosu::Font.new(80, name: 'fonts/chess_merida_unicode.ttf')
     @font_x = Gosu::Font.new(10, name: 'fonts/unifont-14.0.01.ttf')
+    @selected = false
+    @to_selected = false
   end
 
   def on_board?
@@ -59,6 +61,18 @@ class Square
     end
   end
 
+  def highlight_from
+    x = @x
+    y = @y
+    color = Gosu::Color.rgba(48,255,150,82) 
+    x *= width
+    y *= width
+    $window.draw_quad(x, y, color,
+                      x + width, y, color,
+                      x + width, y + width, color,
+                      x, y + width, color)
+  end
+
   def draw
     x = @x
     y = @y
@@ -76,6 +90,8 @@ class Square
     px = (width - font.text_width(piece)) / 2
     font.draw_text(piece, x + px, y + 15, 1, 1, 1, @color)
     font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
+    highlight_from if  mouse_over_square && selected
+    highlight_from if  to_selected
   end
 
   def mouse_over_square

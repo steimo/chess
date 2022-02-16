@@ -48,6 +48,8 @@ class Move
       (position.sign_x == 0 || position.sign_y == 0) && can_move_straight?
     when 'B'
       (position.sign_x != 0 && position.sign_y != 0) && can_move_straight?
+    when 'P'
+      can_pawn_move
     end
   end
 
@@ -59,6 +61,35 @@ class Move
   def king?
     str = position.piece_from
     %w[K k].include?(str)
+  end
+
+  def can_pawn_move
+    if position.from.y > 6 || position.from.y < 1
+      false
+    else
+      step_y = position.from.piece_color == 'w' ? -1 : 1
+      can_pawn_go(step_y) || can_pawn_jump(step_y)  || can_pawn_eat(step_y)
+    end
+  end
+
+  def can_pawn_go(step_y)
+    true if position.to.piece == ' ' && (position.delta_x == 0) && (position.delta_y == step_y)
+  end
+
+  def can_pawn_jump(step_y)
+    if position.to.piece == ' ' && (position.delta_x == 0) && (position.delta_y == 2 * step_y) && ((position.from.y == 1 || position.from.y == 6)) && (board.board[position.from.y + step_y][position.from.x].piece == ' ')
+      true
+    end
+  end
+
+  def can_pawn_eat(step_y)
+    if board.board[position.to.y][position.to.x].piece != ' '
+      if position.abs_delta_x == 1
+        if position.delta_y == step_y
+          true
+        end
+        end
+    end
   end
 
   def can_move_straight?
