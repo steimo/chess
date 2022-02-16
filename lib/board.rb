@@ -70,6 +70,26 @@ class Board
     end
   end
 
+  def yield_pieces
+    result = []
+    board.flatten.each do |square|
+      if square.piece_color == fen.active
+        result << PieceOnSquare.new(square.piece_str, square)
+      end
+    end
+    result
+  end
+  
+  def yield_squares
+    result = []
+    board.flatten.each do |square|
+      if square.piece == " "
+        result << square
+      end
+    end
+    result
+  end
+
   def move(position)
     move = Move.new(self, position)
     string = move.to_algebraic_notation_string

@@ -36,7 +36,6 @@ class Move
       true if position.abs_delta_x <= 1 && position.abs_delta_y <= 1
     when 'N'
       if position.abs_delta_x == 1 && position.abs_delta_y == 2
-
         true
       elsif position.abs_delta_x == 2 && position.abs_delta_y == 1
         true

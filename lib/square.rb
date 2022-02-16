@@ -18,6 +18,15 @@ class Square
     true if x >= 0 && x < 8 && y >= 0 && y < 8
   end
 
+  def piece_color
+    piece = PIECES.key(@piece) || ''
+    /[[:upper:]]/.match(piece) ? 'w' : 'b'
+  end
+
+  def piece_str
+    piece = PIECES.key(@piece) || ''
+  end
+
   def update
     @color = if mouse_over_square
                Gosu::Color.rgba(1, 210, 161, 254)
@@ -25,7 +34,7 @@ class Square
                Gosu::Color::BLACK
              end
     # puts define_position if mouse_over_square
-     # puts "x:#{@x} y:#{@y}" if mouse_over_square
+    # puts "x:#{@x} y:#{@y}" if mouse_over_square
   end
 
   def x_input(x)
@@ -40,15 +49,14 @@ class Square
     y = y.ord - '1'.ord
   end
 
-
   def define_position # returns position on board
-  ('a'..'h').each.with_index do |col, i|
-    (1..8).each.with_index do |row, j|
-      y = 7 - @y
-      x = @x
-      return "#{col}#{row}" if i == x && j == y 
+    ('a'..'h').each.with_index do |col, i|
+      (1..8).each.with_index do |row, j|
+        y = 7 - @y
+        x = @x
+        return "#{col}#{row}" if i == x && j == y
+      end
     end
-  end
   end
 
   def draw
@@ -76,7 +84,7 @@ class Square
     $window.mouse_x.between?(x, x + width - 2) && $window.mouse_y.between?(y, y + width - 2)
   end
 
-   def ==(other)
-     return self.x == other.x && self.y == other.y && self.piece == other.piece
-   end
+  def ==(other)
+    x == other.x && y == other.y && piece == other.piece
+  end
 end
