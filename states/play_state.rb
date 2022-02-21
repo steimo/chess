@@ -26,7 +26,7 @@ class PlayState < GameState
       @first_click = false
       find_all_moves
       @from = get_idx
-    elsif !first_click 
+    elsif !first_click && id == Gosu::MsLeft
       @toos = []
       @to = get_idx
       move unless @from.nil? || @to.nil? || @from.piece == ' '
@@ -49,7 +49,7 @@ class PlayState < GameState
       all_squares_to.each do |to|
         position = Position.new(p.square, to)
         move = Move.new(board, position)
-        all_moves << position if move.can_move
+        all_moves << position if move.can_move 
       end
     end
     curently_selected_sq = @board.board.flatten.detect { |m| m.mouse_over_square }
@@ -66,8 +66,13 @@ class PlayState < GameState
 
   def move # 'Pe2e4' 'Pe7e8Q'
     position = Position.new(@from, @to)
+    # print board.is_check_after_move(position)
     move = Move.new(board, position)
-    if move.can_move
+    if !move.can_move 
+      return self
+    elsif board.is_check_after_move(position)
+      return self
+    else #move.can_move 
       nextBoard = @board.move(position)
       nextPlayState = PlayState.new(nextBoard)
       GameState.switch(nextPlayState)
