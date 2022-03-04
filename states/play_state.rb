@@ -49,7 +49,7 @@ class PlayState < GameState
       all_squares_to.each do |to|
         position = Position.new(p.square, to)
         move = Move.new(board, position)
-        all_moves << position if move.can_move 
+        all_moves << position if move.can_move # && !board.is_check_after_move(position)
       end
     end
     curently_selected_sq = @board.board.flatten.detect { |m| m.mouse_over_square }
@@ -68,12 +68,14 @@ class PlayState < GameState
     position = Position.new(@from, @to)
     # print board.is_check_after_move(position)
     move = Move.new(board, position)
-    if !move.can_move 
-      return self
+    if !move.can_move
+      self
     elsif board.is_check_after_move(position)
-      return self
-    else #move.can_move 
+      self
+    else # move.can_move
       nextBoard = @board.move(position)
+      nextBoard.last_move_x = position.to.x if  %w[P p].include?(position.from.piece_str.to_s) && (position.to.y - position.from.y).abs
+      nextBoard.last_move_y = position.to.y if  %w[P p].include?(position.from.piece_str.to_s) && (position.to.y - position.from.y).abs
       nextPlayState = PlayState.new(nextBoard)
       GameState.switch(nextPlayState)
     end
