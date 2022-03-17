@@ -1,4 +1,5 @@
 require 'gosu'
+require 'debug'
 require 'pry'
 require 'pgn'
 require_relative 'states/game_state'

@@ -4,7 +4,7 @@ class MenuState < GameState
   attr_accessor :play_state
 
   def initialize
-   @headline_font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
+    @headline_font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
     @button_c = Button.new('', 110)
     @button_ng = Button.new('New game', 60)
     @button_l = Button.new('Load game', 0)
@@ -28,7 +28,7 @@ class MenuState < GameState
     color = Gosu::Color.rgba(238, 238, 210, 255)
     width = $window.width
     $window.draw_quad(0, 0, color, width, 0, color, 0, width, color, width, width, color, z = 1, mode = :default)
-    glyph = "♚"
+    glyph = '♚'
     @headline_font.draw_text(glyph, 20, 700, 10, 1, 1, Gosu::Color::BLACK)
   end
 
@@ -59,6 +59,10 @@ class MenuState < GameState
     $window.close if @button_q.mouse_over_button && id == Gosu::MsLeft
     GameState.switch(@play_state) if @button_c.mouse_over_button && @play_state
     if @button_ng.mouse_over_button && id == Gosu::MsLeft
+      $can_white_castle_right = true
+      $can_white_castle_left = true
+      $can_black_castle_right = true
+      $can_black_castle_left = true
       @play_state =  PlayState.new
       @button_c.text = 'Continue'
       GameState.switch(@play_state)
