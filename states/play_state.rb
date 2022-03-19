@@ -38,6 +38,8 @@ class PlayState < GameState
       deselect
       @first_click = true
       return self
+    elsif id == Gosu::KbU
+      $flip == true ? $flip = false : $flip = true
     elsif !first_click && id == Gosu::MsLeft
       @toos = []
       @to = get_idx
@@ -86,6 +88,7 @@ class PlayState < GameState
       self
     else # move.can_move
       nextBoard = @board.move(position)
+      $flip == true ? $flip = false : $flip = true
       update_castle_flags(from.x, from.y, to.x, to.y)
       nextPlayState = PlayState.new(nextBoard)
       GameState.switch(nextPlayState)

@@ -5,10 +5,11 @@ class Board
   $can_white_castle_left = true
   $can_black_castle_right = true
   $can_black_castle_left = true
-  def initialize(fen = PGN::FEN.new('r3k2r/5pp1/8/8/8/8/6P1/R3K2R w KQkq - 0 1'))
+  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'))
     @fen = fen
     @board = initialize_board
     @turn = :white
+    @flip = false
     # puts fen
     # @castling = 'KQkq'
     # @ep = nil

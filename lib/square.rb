@@ -52,8 +52,10 @@ class Square
   end
 
   def define_position # returns position on board
-    ('a'..'h').each.with_index do |col, i|
-      (1..8).each.with_index do |row, j|
+    ranks = ('a'..'h').to_a
+    files = (1..8).to_a
+    ranks.each.with_index do |col, i|
+      files.each.with_index do |row, j|
         y = 7 - @y
         x = @x
         return "#{col}#{row}" if i == x && j == y
@@ -85,18 +87,30 @@ class Square
                       x + width, y, color,
                       x + width, y + width, color,
                       x, y + width, color)
+    if $flip
+    gx = (7 - @x) * width
+    gy = (7 - @y) * width
+    else
+      gx = x
+      gy = y
+    end
     str = PIECES[piece] || ''
     cx = (width - font.text_width(str)) / 2
     px = (width - font.text_width(piece)) / 2
-    font.draw_text(piece, x + px, y + 15, 1, 1, 1, @color)
-    font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
+    font.draw_text(piece, gx + px, gy + 15, 1, 1, 1, @color)
+    # font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
     highlight_from if  mouse_over_square && selected
     highlight_from if  to_selected
   end
 
   def mouse_over_square
-    x = @x * width
-    y = @y * width
+    if $flip
+      x = (7 - @x) * width
+      y = (7 - @y) * width
+    else
+      x = @x * width
+      y = @y * width
+    end
     $window.mouse_x.between?(x, x + width - 2) && $window.mouse_y.between?(y, y + width - 2)
   end
 

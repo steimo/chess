@@ -63,6 +63,7 @@ class MenuState < GameState
       $can_white_castle_left = true
       $can_black_castle_right = true
       $can_black_castle_left = true
+      $flip = false
       @play_state =  PlayState.new
       @button_c.text = 'Continue'
       GameState.switch(@play_state)
