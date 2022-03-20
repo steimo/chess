@@ -36,7 +36,7 @@ class Square
                Gosu::Color::BLACK
              end
     # puts define_position if mouse_over_square
-    # puts "x:#{@x} y:#{@y}" if mouse_over_square
+    #puts "x:#{@x} y:#{@y}" if mouse_over_square
   end
 
   def x_input(x)
@@ -66,9 +66,13 @@ class Square
   def highlight_from
     x = @x
     y = @y
-    color = Gosu::Color.rgba(48,255,150,82) 
+    color = Gosu::Color.rgba(48, 255, 150, 82)
     x *= width
     y *= width
+    if $flip
+      x = (7 - @x) * width
+      y = (7 - @y) * width
+    end
     $window.draw_quad(x, y, color,
                       x + width, y, color,
                       x + width, y + width, color,
@@ -83,13 +87,17 @@ class Square
     color = (x + y).even? ? light : dark
     x *= width
     y *= width
+    if $flip
+      x = (7 - @x) * width
+      y = (7 - @y) * width
+    end
     $window.draw_quad(x, y, color,
                       x + width, y, color,
                       x + width, y + width, color,
                       x, y + width, color)
     if $flip
-    gx = (7 - @x) * width
-    gy = (7 - @y) * width
+      gx = (7 - @x) * width
+      gy = (7 - @y) * width
     else
       gx = x
       gy = y
@@ -99,8 +107,9 @@ class Square
     px = (width - font.text_width(piece)) / 2
     font.draw_text(piece, gx + px, gy + 15, 1, 1, 1, @color)
     # font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
-    highlight_from if  mouse_over_square && selected
-    highlight_from if  to_selected
+    # highlight_from if  mouse_over_square && selected
+    highlight_from if to_selected
+    highlight_from if selected
   end
 
   def mouse_over_square

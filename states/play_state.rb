@@ -6,6 +6,7 @@ class PlayState < GameState
     @board = board
     @first_click = true
     board.is_check
+    @all_squares_to = board.yield_squares
     # info
   end
 
@@ -15,6 +16,7 @@ class PlayState < GameState
 
   def update
     @board.update
+    find_moves if @first_click
   end
 
   def get_idx # returns square object
@@ -34,19 +36,40 @@ class PlayState < GameState
       @first_click = false
       # find_all_moves <<<<< huge bag here needs refactoring
       @from = get_idx
+      @from.selected = true
     elsif id == Gosu::MsRight
-      deselect
       @first_click = true
+      @from.selected = false unless from.nil?
       return self
     elsif id == Gosu::KbU
       $flip == true ? $flip = false : $flip = true
     elsif !first_click && id == Gosu::MsLeft
       @toos = []
       @to = get_idx
+      @from.selected = false unless from.nil?
       move unless @from.nil? || @to.nil? || @from.piece == ' '
       @first_click = true
     else
       self
+    end
+  end
+
+  def find_moves(from=get_idx)
+    moves = []
+    from = get_idx 
+    deselect
+    if from.nil? 
+      deselect 
+      return nil
+    else
+    @all_squares_to.each do |to|
+    position = Position.new(from, to)
+    move = Move.new(board, position)
+    moves << position if move.can_move 
+    end
+    moves.each do |m|
+      m.to.to_selected = true if !board.is_check_after_move(m)
+    end
     end
   end
 
