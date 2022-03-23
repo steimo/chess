@@ -5,17 +5,12 @@ class Board
   $can_white_castle_left = true
   $can_black_castle_right = true
   $can_black_castle_left = true
-  def initialize(fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'))
+  def initialize(fen = PGN::FEN.new('r3k2r/6Pr/8/8/8/8/Rp6/R3KN1R w KQkq - 0 1'))
     @fen = fen
     @board = initialize_board
-    @turn = :white
-    @flip = false
+    # @turn = :white
+    # @flip = false
     # puts fen
-    # @castling = 'KQkq'
-    # @ep = nil
-    # @halfmove = 0
-    # @fullmove = 1
-    # @king = { white: e1, black: e8 }
   end
 
   def initialize_board
@@ -75,13 +70,13 @@ class Board
     end
   end
 
-  def yield_pieces
-    result = []
-    board.flatten.each do |square|
-      result << PieceOnSquare.new(square.piece_str, square) if square.piece_color == fen.active
-    end
-    result
-  end
+  # def yield_pieces
+  #   result = []
+  #   board.flatten.each do |square|
+  #     result << PieceOnSquare.new(square.piece_str, square) if square.piece_color == fen.active
+  #   end
+  #   result
+  # end
 
   def yield_squares
     result = []
@@ -104,24 +99,38 @@ class Board
     Board.new(new)
   end
 
-  def find_bad_king
+  def find_opposite_king
     str = fen.active == 'b' ? 'K' : 'k'
     board.flatten.detect { |sq| sq.piece_str.to_s == str }
+  end
+  
+  def find_king
+    str = fen.active == 'b' ? 'k' : 'K'
+    board.flatten.detect { |sq| sq.piece_str.to_s == str }
+  end
+
+  def square_is_empty?(x, y)
+    square = board[y][x]
+    square.piece == ' '
   end
 
   def yield_pieces_for_def # returns opposite pieces
     str = fen.active == 'b' ? /\b[a-z]+\b/ : /\b[A-Z]+\b/
     result = []
     board.flatten.each do |square|
-      result << PieceOnSquare.new(square.piece_str, square) if square.piece_str.match(str)
+      result << square if square.piece_str.match(str)
     end
     result
   end
 
+  # asdl;fjasdl;jf;lasdfjs;la
   def can_eat_king
-    bad_king = find_bad_king
-    x = yield_pieces_for_def.each do |p|
-      position = Position.new(p.square, bad_king)
+    str = fen.active == 'b' ? /\b[a-z]+\b/ : /\b[A-Z]+\b/
+    bad_king = find_opposite_king
+    board.flatten.each do |p|
+      next unless p.piece_str.match(str)
+
+      position = Position.new(p, bad_king)
       move = Move.new(self, position)
       return true if move.can_move
     end
@@ -129,16 +138,14 @@ class Board
   end
 
   def is_check_after_move(pos)
-    x = fen.active == 'w' ? :b : :w
-    # fen.active = x
+    # x = fen.active == 'w' ? :b : :w
     after = Board.new(fen)
     after = after.move(pos)
     after.can_eat_king
   end
 
-
   # refactoring < < < < < < < < < < <
-  
+
   def yield_pieces_for_fff # returns opposite pieces
     str = fen.active == 'b' ? /\b[A-Z]+\b/ : /\b[a-z]+\b/
     result = []
@@ -148,12 +155,15 @@ class Board
     result
   end
 
-  def is_check
+  def is_king_under_check
     str = fen.active == 'b' ? 'k' : 'K'
     king = board.flatten.detect { |sq| sq.piece_str.to_s == str }
     x = yield_pieces_for_fff.each do |p|
       position = Position.new(p.square, king)
       move = Move.new(self, position)
+      str = fen.active == 'b' ? 'k' : 'K'
+      king = board.flatten.detect { |sq| sq.piece_str.to_s == str }
+      king.checked = true if move.can_piece_move
       return @king_under_check = true if move.can_piece_move
     end
     @king_under_check = false

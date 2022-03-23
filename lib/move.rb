@@ -1,5 +1,5 @@
 class Move
-  attr_accessor :board, :position, :fen
+  attr_accessor :board, :position, :fen, :enx, :eny
 
   def initialize(board, position)
     @board = board
@@ -57,27 +57,6 @@ class Move
     end
   end
 
-  # def can_castle
-  #   return false if position.abs_delta_x != 2
-  #   return false if position.to.y != position.from.y
-  #   return false if board.king_under_check
-  #   if board.board[position.from.y][position.from.x].piece_str.to_s == 'K' && position.from.x == 4 && position.from.y == 7
-  #     return can_white_castle
-  #   end
-  #   if board.board[position.from.y][position.from.x].piece_str.to_s == 'k' && position.from.x == 4 && position.from.y == 0
-  #     return can_black_castle
-  #   end
-  # end
-
-  # def can_white_castle
-  #   true
-  # end
-
-  # def can_black_castle
-  #   true
-  # end
-  #
-
   def can_castle
     from_x = position.from.x
     from_y = position.from.y
@@ -88,66 +67,62 @@ class Move
     return can_white_cl if piece == 'K' && from_x == 4 && from_y == 7 && to_x == 2 && to_y == 7
     return can_black_cr if piece == 'k' && from_x == 4 && from_y == 0 && to_x == 6 && to_y == 0
     return can_black_cl if piece == 'k' && from_x == 4 && from_y == 0 && to_x == 2 && to_y == 0
+
     false
   end
-  
-  def find_king
-    str = fen.active == 'w' ? 'K' : 'k'
-    board.board.flatten.detect { |sq| sq.piece_str.to_s == str }
-  end
 
-  def cell_check(x, y) # < checks cell near king is there check or not
-    king = find_king
+  # checks if king does not pass through a square that is attacked by an enemy piece.
+  def king_cell_check(x, y)
+    king = board.find_king
     cell = board.board[y][x]
     pos = Position.new(king, cell)
     board.is_check_after_move(pos)
   end
 
-  def cell_is_empty?(x, y)
-    cell = board.board[y][x]
-    cell.piece == ' ' ? true : false
-  end
-
   def can_white_cr
-    return false if !$can_white_castle_right
+    return false unless $can_white_castle_right
     return false if board.king_under_check
-    return false if cell_check(5, 7)
-    return false if !cell_is_empty?(5, 7)
-    return false if !cell_is_empty?(6, 7)
+    return false if king_cell_check(5, 7)
+    return false unless board.square_is_empty?(5, 7)
+    return false unless board.square_is_empty?(6, 7)
     return false if board.board[7][7].piece_str.to_s != 'R'
-    return true
+
+    true
   end
 
   def can_white_cl
-    return false if !$can_white_castle_left
+    return false unless $can_white_castle_left
     return false if board.king_under_check
-    return false if cell_check(3, 7)
-    return false if !cell_is_empty?(3, 7)
-    return false if !cell_is_empty?(2, 7)
-    return false if !cell_is_empty?(1, 7)
+    return false if king_cell_check(3, 7)
+    return false unless board.square_is_empty?(3, 7)
+    return false unless board.square_is_empty?(2, 7)
+    return false unless board.square_is_empty?(1, 7)
     return false if board.board[7][0].piece_str.to_s != 'R'
-    return true
+
+    true
   end
 
   def can_black_cr
-    return false if !$can_black_castle_right
+    return false unless $can_black_castle_right
     return false if board.king_under_check
-    return false if cell_check(5, 0)
-    return false if !cell_is_empty?(5, 0)
-    return false if !cell_is_empty?(6, 0)
+    return false if king_cell_check(5, 0)
+    return false unless board.square_is_empty?(5, 0)
+    return false unless board.square_is_empty?(6, 0)
     return false if board.board[0][7].piece_str.to_s != 'r'
-    return true
+
+    true
   end
 
   def can_black_cl
-    return false if !$can_black_castle_left
+    return false unless $can_black_castle_left
     return false if board.king_under_check
-    return false if cell_check(3, 0)
-    return false if !cell_is_empty?(3, 0)
-    return false if !cell_is_empty?(2, 0)
-    return false if !cell_is_empty?(1, 0)
+    return false if king_cell_check(3, 0)
+    return false unless board.square_is_empty?(3, 0)
+    return false unless board.square_is_empty?(2, 0)
+    return false unless board.square_is_empty?(1, 0)
     return false if board.board[0][0].piece_str.to_s != 'r'
-    return true
+
+    true
   end
 
   def pawn?
@@ -169,19 +144,19 @@ class Move
     end
   end
 
-  # def check_last_move # need to detect last pawn not here
-  #    @pawn_attack_x = -1
-  #    @pawn_attack_y = -1
-  #    str = board.board[$last_move_y][$last_move_x].piece_str
-  #     if %w[P p].include?(str) && (position.to.y - position.from.y).abs
-  #     @pawn_attack_x = $last_move_x
-  #     @pawn_attack_y = $last_move_x
-  #   end
-  # end
+  def check_pawn_attack
+    $enx = -1
+    $eny = -1
+    last_moved_piece = board.board[$last_move_from_y][$last_move_from_x].piece_str.to_s
+    if %w[P p].include?(last_moved_piece) && (($last_move_to_y - $last_move_from_y).abs == 2)
+      $enx = $last_move_from_x
+      $eny = ($last_move_from_y + $last_move_to_y) / 2
+    end
+  end
 
-  def en_passant(step_y)
+  def en_passant(_step_y)
     step = position.from.piece_color == 'w' ? 3 : 4
-    if !(position.to.x == $last_move_x && position.to.y == $last_move_y + step_y)
+    if !(position.to.x == $enx && position.to.y == $eny) #+ step_y
       false
     elsif position.from.y != step
       false
@@ -229,16 +204,17 @@ class Move
     step_y = position.from.piece_color == 'w' ? -1 : 1
     piece = position.piece_from
     piece_str = pawn? ? '' : piece.upcase
-    if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 2 
-      return 'O-O-O'
-    end
-    if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 6 
-      return 'O-O'
-    end
-    if position.to.x == $last_move_x && position.to.y == $last_move_y + step_y && (position.to.y - position.from.y).abs && pawn? # en_passant notation
-      # puts 'sadfljkhasdflkhsadlkfh'
-      # puts $last_move_x
-      # puts $last_move_y
+    # cell = board.board[position.to.y][position.to.x]
+    # empty = cell.piece == ' '
+    # if position.to.y == 7 && pawn? && empty || position.to.y == 0 && pawn? && empty # this block is for promotion
+    #   return "#{position.to.define_position}=#{$promotion='Q'}"
+    # elsif position.to.y == 7 && pawn? && !empty || position.to.y == 0 && pawn? && !empty
+    #   return "#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}=#{$promotion='Q'}"
+    # end
+    return 'O-O-O' if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 2
+    return 'O-O' if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 6
+
+    if position.to.x == $enx && position.to.y == $eny && (position.to.y - position.from.y).abs && pawn?  # for an en_passant notation
       "#{piece_str}#{position.from.define_position}x#{position.to.define_position}"
     else
       "#{piece_str}#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}"

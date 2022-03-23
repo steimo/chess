@@ -1,13 +1,11 @@
 class PlayState < GameState
-  # attr_accessor :position, :from, :to
   attr_accessor :board, :from, :to, :first_click
 
   def initialize(board = Board.new)
     @board = board
     @first_click = true
-    board.is_check
-    @all_squares_to = board.yield_squares
-    # info
+    # checks condition that occurs when a player's king is under threat of capture on the opponent's next turn.
+    board.is_king_under_check
   end
 
   def draw
@@ -16,37 +14,30 @@ class PlayState < GameState
 
   def update
     @board.update
-    find_moves if @first_click
+    highlight_moves if @first_click
   end
 
-  def get_idx # returns square object
-    @board.board.flatten.detect { |sq| sq.mouse_over_square }
-  end
-
-  def piece_color(piece)
-    /[[:upper:]]/.match(piece) ? 'w' : 'b'
+  # returns square object that is curently hovered by mouse.
+  def mouseover_sq
+    board.board.flatten.detect(&:mouse_over_square)
   end
 
   def button_down(id)
-    $window.close if id == Gosu::KbQ
-    GameState.switch(MenuState.instance) if id == Gosu::KbEscape
-    return self unless get_idx # check of correct input
+    return self unless mouseover_sq # makes sure hovered square is not nil.
 
-    if first_click && get_idx.piece != ' ' && id == Gosu::MsLeft
+    GameState.switch(MenuState.instance) if id == Gosu::KbEscape
+    if first_click && mouseover_sq.piece != ' ' && id == Gosu::MsLeft
       @first_click = false
-      # find_all_moves <<<<< huge bag here needs refactoring
-      @from = get_idx
+      @from = mouseover_sq
       @from.selected = true
     elsif id == Gosu::MsRight
       @first_click = true
       @from.selected = false unless from.nil?
-      return self
-    elsif id == Gosu::KbU
-      $flip == true ? $flip = false : $flip = true
+    elsif id == Gosu::KbU # flips the board.
+      $flip = !($flip == true)
     elsif !first_click && id == Gosu::MsLeft
-      @toos = []
-      @to = get_idx
-      @from.selected = false unless from.nil?
+      @to = mouseover_sq
+      @from.selected = false
       move unless @from.nil? || @to.nil? || @from.piece == ' '
       @first_click = true
     else
@@ -54,44 +45,18 @@ class PlayState < GameState
     end
   end
 
-  def find_moves(from=get_idx)
-    moves = []
-    from = get_idx 
+  # highlights moves for hovered square.
+  def highlight_moves
+    from_sq = mouseover_sq
     deselect
-    if from.nil? 
-      deselect 
-      return nil
+    if from_sq.nil?
+      deselect
+      nil
     else
-    @all_squares_to.each do |to|
-    position = Position.new(from, to)
-    move = Move.new(board, position)
-    moves << position if move.can_move 
-    end
-    moves.each do |m|
-      m.to.to_selected = true if !board.is_check_after_move(m)
-    end
-    end
-  end
-
-  def find_all_moves
-    all_moves = []
-    all_pieces = @board.yield_pieces
-    all_squares_to = @board.yield_squares
-    all_pieces.each do |p|
-      all_squares_to.each do |to|
-        position = Position.new(p.square, to)
+      board.yield_squares.each do |sq|
+        position = Position.new(from_sq, sq)
         move = Move.new(board, position)
-        all_moves << position if move.can_move && !board.is_check_after_move(position)
-      end
-    end
-    curently_selected_sq = @board.board.flatten.detect { |m| m.mouse_over_square }
-    all_moves.each do |move|
-      move.from.selected = true
-      @toos = []
-      @toos << move if curently_selected_sq.define_position == move.from.define_position
-      # puts "#{move.from.piece}#{move.from.define_position}#{move.to.define_position}"
-      @toos.map do |to|
-        to.to.to_selected = true
+        position.to.to_selected = true if move.can_move # && !board.is_check_after_move(position)
       end
     end
   end
@@ -101,22 +66,37 @@ class PlayState < GameState
       sq.to_selected = false
     end
   end
-  
-  def move # 'Pe2e4' 'Pe7e8Q'
+
+  def promotion(board, move, position)
+    x = PromotionState.new(board, move, position)
+    GameState.switch(x)
+  end
+
+  def move
     position = Position.new(@from, @to)
     move = Move.new(board, position)
     if !move.can_move
       self
     elsif board.is_check_after_move(position)
+      king = board.find_king
+      king.checked = true
       self
-    else # move.can_move
-      nextBoard = @board.move(position)
-      $flip == true ? $flip = false : $flip = true
-      update_castle_flags(from.x, from.y, to.x, to.y)
-      nextPlayState = PlayState.new(nextBoard)
-      GameState.switch(nextPlayState)
-      $last_move_x = position.to.x
-      $last_move_y = position.to.y
+    else
+      # occurs when the pawn
+      # moves to the rank(row) furthest
+      # from its starting position and results in promotion state.
+      return promotion(board, move, position) if position.to.y == 7 && move.pawn? || position.to.y == 0 && move.pawn?
+
+      next_board = @board.move(position)
+      $flip = !($flip == true)
+      update_castle_flags(from.x, from.y, to.x, to.y) # checks if neither the king nor the rook has previously moved.
+      next_play_state = PlayState.new(next_board)
+      GameState.switch(next_play_state)
+      $last_move_from_x = position.from.x
+      $last_move_from_y = position.from.y
+      $last_move_to_x = position.to.x
+      $last_move_to_y = position.to.y
+      move.check_pawn_attack # checks if an enemy pawn has just moved two squares in a single move and assigns values to the square that the enemy pawn passed.
     end
   end
 
@@ -130,42 +110,10 @@ class PlayState < GameState
       $can_black_castle_right = false
       $can_black_castle_left = false
     end
-    if piece == 'R' && from_x == 0 && from_y == 7 
-      $can_white_castle_left = false
-    end
-    if piece == 'R' && from_x == 7 && from_y == 7 
-      $can_white_castle_right = false
-    end
+    $can_white_castle_left = false if piece == 'R' && from_x == 0 && from_y == 7
+    $can_white_castle_right = false if piece == 'R' && from_x == 7 && from_y == 7
 
-    if piece == 'r' && from_x == 0 && from_y == 0 
-      $can_black_castle_left = false
-    end
-    if piece == 'r' && from_x == 7 && from_y == 0 
-      $can_black_castle_right = false
-    end
-  end
-
-  def info # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< temprorary
-    if $can_white_castle_right
-      puts 'W can castle right'
-    else
-      puts 'W CANT castle right'
-    end
-    if $can_white_castle_left 
-      puts 'W can castle left'
-    else
-      puts 'W CANT castle left'
-    end
-    if $can_black_castle_right
-      puts 'B can castle right'
-    else
-      puts 'B CANT castle right'
-    end
-    if $can_black_castle_left 
-      puts 'B can castle left'
-    else
-      puts 'B CANT castle left'
-    end
-    puts '<<<<<<<<<<<<<<<<<<<<<<<'
+    $can_black_castle_left = false if piece == 'r' && from_x == 0 && from_y == 0
+    $can_black_castle_right = false if piece == 'r' && from_x == 7 && from_y == 0
   end
 end
