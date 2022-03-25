@@ -1,14 +1,9 @@
 class Position
-  attr_accessor :piece_from, :piece_to, :from, :to, :promotion
-
-  PIECES = { R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚', p: '♟' }
+  attr_accessor :from, :to 
 
   def initialize(from, to)
-    @from = from # Square class
-    @to = to # Square class
-    @promotion = promotion
-    @piece_from = PIECES.key(from.piece).to_s || ''
-    @piece_to = PIECES.key(to.piece).to_s || ''
+    @from = from # Square class.
+    @to = to # Square class.
   end
 
   def delta_x

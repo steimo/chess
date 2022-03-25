@@ -5,11 +5,27 @@ class PlayState < GameState
     @board = board
     @first_click = true
     # checks condition that occurs when a player's king is under threat of capture on the opponent's next turn.
-    board.is_king_under_check
+    board.king_under_check?
+    @font = Gosu::Font.new(25, bold: true)
   end
 
   def draw
     @board.draw
+    draw_coordinates
+  end
+
+  def draw_coordinates
+    light = Gosu::Color.rgba(238, 238, 210, 255)
+    dark = Gosu::Color.rgba(118, 150, 86, 255)
+    ranks = ('a'..'h').to_a
+    ranks.reverse! if $flip
+    ranks.each.with_index do |col, x|
+      color = x.even? ? light : dark
+      @font.draw_markup(col.to_s, (x * 100) + 85, $window.height - 25, 2, 1, 1, color)
+      color = x.odd? ? light : dark
+      file = $flip ? (x + 1) : 7 - (x - 1)
+      @font.draw_markup(file, $window.width - 795, (x * 100), 2, 1, 1, color)
+    end
   end
 
   def update
@@ -25,7 +41,10 @@ class PlayState < GameState
   def button_down(id)
     return self unless mouseover_sq # makes sure hovered square is not nil.
 
-    GameState.switch(MenuState.instance) if id == Gosu::KbEscape
+    if id == Gosu::KbEscape
+      MenuState.instance.play_state = PlayState.new(board)
+      GameState.switch(MenuState.instance)
+    end
     if first_click && mouseover_sq.piece != ' ' && id == Gosu::MsLeft
       @first_click = false
       @from = mouseover_sq
@@ -56,14 +75,14 @@ class PlayState < GameState
       board.yield_squares.each do |sq|
         position = Position.new(from_sq, sq)
         move = Move.new(board, position)
-        position.to.to_selected = true if move.can_move # && !board.is_check_after_move(position)
+        position.to.highlighted = true if move.can_move && !board.is_check_after_move(position)
       end
     end
   end
 
   def deselect
     board.board.flatten.each do |sq|
-      sq.to_selected = false
+      sq.highlighted = false
     end
   end
 
@@ -88,8 +107,10 @@ class PlayState < GameState
       return promotion(board, move, position) if position.to.y == 7 && move.pawn? || position.to.y == 0 && move.pawn?
 
       next_board = @board.move(position)
+      next_board.board[from.y][from.x].moved = true
+      next_board.board[to.y][to.x].moved = true
       $flip = !($flip == true)
-      update_castle_flags(from.x, from.y, to.x, to.y) # checks if neither the king nor the rook has previously moved.
+      update_castle_flags # checks if neither the king nor the rook has previously moved.
       next_play_state = PlayState.new(next_board)
       GameState.switch(next_play_state)
       $last_move_from_x = position.from.x
@@ -100,8 +121,8 @@ class PlayState < GameState
     end
   end
 
-  def update_castle_flags(from_x, from_y, _to_x, _to_y)
-    piece = board.board[from_y][from_x].piece_str.to_s
+  def update_castle_flags
+    piece = board.board[from.y][from.x].piece_char
     if piece == 'K'
       $can_white_castle_right = false
       $can_white_castle_left = false
@@ -110,10 +131,10 @@ class PlayState < GameState
       $can_black_castle_right = false
       $can_black_castle_left = false
     end
-    $can_white_castle_left = false if piece == 'R' && from_x == 0 && from_y == 7
-    $can_white_castle_right = false if piece == 'R' && from_x == 7 && from_y == 7
+    $can_white_castle_left = false if piece == 'R' && from.x == 0 && from.y == 7
+    $can_white_castle_right = false if piece == 'R' && from.x == 7 && from.y == 7
 
-    $can_black_castle_left = false if piece == 'r' && from_x == 0 && from_y == 0
-    $can_black_castle_right = false if piece == 'r' && from_x == 7 && from_y == 0
+    $can_black_castle_left = false if piece == 'r' && from.x == 0 && from.y == 0
+    $can_black_castle_right = false if piece == 'r' && from.x == 7 && from.y == 0
   end
 end

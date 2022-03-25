@@ -1,5 +1,5 @@
 class Move
-  attr_accessor :board, :position, :fen, :enx, :eny
+  attr_accessor :board, :position, :fen
 
   def initialize(board, position)
     @board = board
@@ -12,25 +12,19 @@ class Move
   end
 
   def can_move_from
-    true if piece_color(position.piece_from) == fen.active
-  end
-
-  def piece_color(piece)
-    /[[:upper:]]/.match(piece) ? 'w' : 'b'
+    true if position.from.piece_color == fen.active
   end
 
   def can_move_to
-    if position.piece_to == ''
+    if position.to.piece_char == ''
       true
     else
-      piece_color(position.piece_to) != fen.active
+      position.to.piece_color != fen.active
     end
   end
 
   def can_piece_move
-    piece = position.piece_from.to_s
-    from = position.from.define_position
-    to = position.to.define_position
+    piece = position.from.piece_char
     case piece.upcase
     when 'K'
       if position.abs_delta_x <= 1 && position.abs_delta_y <= 1
@@ -62,7 +56,7 @@ class Move
     from_y = position.from.y
     to_x = position.to.x
     to_y = position.to.y
-    piece = board.board[from_y][from_x].piece_str.to_s
+    piece = board.board[from_y][from_x].piece_char
     return can_white_cr if piece == 'K' && from_x == 4 && from_y == 7 && to_x == 6 && to_y == 7
     return can_white_cl if piece == 'K' && from_x == 4 && from_y == 7 && to_x == 2 && to_y == 7
     return can_black_cr if piece == 'k' && from_x == 4 && from_y == 0 && to_x == 6 && to_y == 0
@@ -81,57 +75,57 @@ class Move
 
   def can_white_cr
     return false unless $can_white_castle_right
-    return false if board.king_under_check
+    return false if board.king_under_check?
     return false if king_cell_check(5, 7)
     return false unless board.square_is_empty?(5, 7)
     return false unless board.square_is_empty?(6, 7)
-    return false if board.board[7][7].piece_str.to_s != 'R'
+    return false if board.board[7][7].piece_char != 'R'
 
     true
   end
 
   def can_white_cl
     return false unless $can_white_castle_left
-    return false if board.king_under_check
+    return false if board.king_under_check?
     return false if king_cell_check(3, 7)
     return false unless board.square_is_empty?(3, 7)
     return false unless board.square_is_empty?(2, 7)
     return false unless board.square_is_empty?(1, 7)
-    return false if board.board[7][0].piece_str.to_s != 'R'
+    return false if board.board[7][0].piece_char != 'R'
 
     true
   end
 
   def can_black_cr
     return false unless $can_black_castle_right
-    return false if board.king_under_check
+    return false if board.king_under_check?
     return false if king_cell_check(5, 0)
     return false unless board.square_is_empty?(5, 0)
     return false unless board.square_is_empty?(6, 0)
-    return false if board.board[0][7].piece_str.to_s != 'r'
+    return false if board.board[0][7].piece_char != 'r'
 
     true
   end
 
   def can_black_cl
     return false unless $can_black_castle_left
-    return false if board.king_under_check
+    return false if board.king_under_check?
     return false if king_cell_check(3, 0)
     return false unless board.square_is_empty?(3, 0)
     return false unless board.square_is_empty?(2, 0)
     return false unless board.square_is_empty?(1, 0)
-    return false if board.board[0][0].piece_str.to_s != 'r'
+    return false if board.board[0][0].piece_char != 'r'
 
     true
   end
 
   def pawn?
-    str = position.piece_from
+    str = position.from.piece_char
     %w[P p].include?(str)
   end
 
   def king?
-    str = position.piece_from
+    str = position.from.piece_char
     %w[K k].include?(str)
   end
 
@@ -140,27 +134,27 @@ class Move
       false
     else
       step_y = position.from.piece_color == 'w' ? -1 : 1
-      can_pawn_go(step_y) || can_pawn_jump(step_y) || can_pawn_eat(step_y) || en_passant(step_y)
+      can_pawn_go(step_y) || can_pawn_jump(step_y) || can_pawn_eat(step_y) || en_passant
     end
   end
 
   def check_pawn_attack
     $enx = -1
     $eny = -1
-    last_moved_piece = board.board[$last_move_from_y][$last_move_from_x].piece_str.to_s
+    last_moved_piece = board.board[$last_move_from_y][$last_move_from_x].piece_char
     if %w[P p].include?(last_moved_piece) && (($last_move_to_y - $last_move_from_y).abs == 2)
       $enx = $last_move_from_x
       $eny = ($last_move_from_y + $last_move_to_y) / 2
     end
   end
 
-  def en_passant(_step_y)
+  def en_passant
     step = position.from.piece_color == 'w' ? 3 : 4
-    if !(position.to.x == $enx && position.to.y == $eny) #+ step_y
+    if !(position.to.x == $enx && position.to.y == $eny)
       false
     elsif position.from.y != step
       false
-    # elsif position.delta_x != 1  # not sure
+    # elsif position.delta_x != 1  # not sure.
     #   false
     elsif position.abs_delta_x == 1
       true
@@ -184,8 +178,7 @@ class Move
   end
 
   def can_move_straight?
-    id = position.from
-    at = board.board[id.y][id.x]
+    at = board.board[position.from.y][position.from.x]
     loop do
       at = board.board[at.y + position.sign_y][at.x + position.sign_x]
       if at == position.to
@@ -200,23 +193,16 @@ class Move
     end
   end
 
-  def to_algebraic_notation_string
-    step_y = position.from.piece_color == 'w' ? -1 : 1
-    piece = position.piece_from
+  # returns string in algebraic notation.
+  def to_an_string
+    piece = position.from.piece_char
     piece_str = pawn? ? '' : piece.upcase
-    # cell = board.board[position.to.y][position.to.x]
-    # empty = cell.piece == ' '
-    # if position.to.y == 7 && pawn? && empty || position.to.y == 0 && pawn? && empty # this block is for promotion
-    #   return "#{position.to.define_position}=#{$promotion='Q'}"
-    # elsif position.to.y == 7 && pawn? && !empty || position.to.y == 0 && pawn? && !empty
-    #   return "#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}=#{$promotion='Q'}"
-    # end
     return 'O-O-O' if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 2
     return 'O-O' if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 6
 
-    if position.to.x == $enx && position.to.y == $eny && (position.to.y - position.from.y).abs && pawn?  # for an en_passant notation
+    if position.to.x == $enx && position.to.y == $eny && (position.to.y - position.from.y).abs && pawn? # for an en_passant notation.
       "#{piece_str}#{position.from.define_position}x#{position.to.define_position}"
-    else
+    else # for basic moves.
       "#{piece_str}#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}"
     end
   end

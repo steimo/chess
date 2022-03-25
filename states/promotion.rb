@@ -56,9 +56,9 @@ class PromotionState < GameState
 
   def make_string(piece, move)
     empty = board.square_is_empty?(position.to.x, position.to.y)
-    if position.to.y == 7 && move.pawn? && empty || position.to.y == 0 && move.pawn? && empty # if square is empty 
+    if position.to.y == 7 && move.pawn? && empty || position.to.y == 0 && move.pawn? && empty # if square is empty.
       "#{position.to.define_position}=#{piece}"
-    elsif position.to.y == 7 && move.pawn? && !empty || position.to.y == 0 && move.pawn? && !empty # if capture
+    elsif position.to.y == 7 && move.pawn? && !empty || position.to.y == 0 && move.pawn? && !empty # if capture.
       "#{position.from.define_position}x#{position.to.define_position}=#{piece}"
     end
   end

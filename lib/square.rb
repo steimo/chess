@@ -1,24 +1,17 @@
 class Square
-  # attr_accessor :color, :piece, :selected
   PIECES = { R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚', p: '♟' }
-  # attr_reader :width, :font
-  attr_accessor :x, :y, :piece, :width, :font, :font_x, :color, :selected, :to_selected, :checked
+  attr_accessor :x, :y, :piece, :selected, :highlighted, :checked, :moved
 
   def initialize(x, y, piece)
-    @x = x_input(x)
-    @y = y_input(y)
+    @x = x
+    @y = y
     @piece = piece
-    # @piece = Piece.new(piece.to_sym)
     @width = 100
-    @font = Gosu::Font.new(80, name: 'fonts/chess_merida_unicode.ttf')
-    @font_x = Gosu::Font.new(10, name: 'fonts/unifont-14.0.01.ttf')
-    @selected = false
-    @to_selected = false
+    @moved = false
     @checked = false
-  end
-
-  def on_board?
-    true if x >= 0 && x < 8 && y >= 0 && y < 8
+    @selected = false
+    @highlighted = false
+    @font = Gosu::Font.new(80, name: 'fonts/chess_merida_unicode.ttf')
   end
 
   def piece_color
@@ -26,73 +19,32 @@ class Square
     /[[:upper:]]/.match(piece) ? 'w' : 'b'
   end
 
-  def piece_str
+  def piece_char
     piece = PIECES.key(@piece) || ''
+    piece.to_s
   end
 
   def update
     @color = if mouse_over_square
-               Gosu::Color.rgba(1, 210, 161, 254)
+               Gosu::Color.rgba(20, 225, 160, 100)
              else
                Gosu::Color::BLACK
              end
     # puts define_position if mouse_over_square
-    #puts "x:#{@x} y:#{@y}" if mouse_over_square
+    # puts "x:#{@x} y:#{@y}" if mouse_over_square
   end
 
-  def x_input(x)
-    return x if x.is_a?(Integer)
-
-    x = x.ord - 'a'.ord
-  end
-
-  def y_input(y)
-    return y if y.is_a?(Integer)
-
-    y = y.ord - '1'.ord
-  end
-
-  def define_position # returns position on board
+  # returns position on board, like: (e2, h8, etc.).
+  def define_position
     ranks = ('a'..'h').to_a
     files = (1..8).to_a
     ranks.each.with_index do |col, i|
       files.each.with_index do |row, j|
-        y = 7 - @y
         x = @x
+        y = 7 - @y
         return "#{col}#{row}" if i == x && j == y
       end
     end
-  end
-
-  def highlight_from
-    x = @x
-    y = @y
-    color = Gosu::Color.rgba(48, 255, 150, 82)
-    x *= width
-    y *= width
-    if $flip
-      x = (7 - @x) * width
-      y = (7 - @y) * width
-    end
-    $window.draw_quad(x, y, color,
-                      x + width, y, color,
-                      x + width, y + width, color,
-                      x, y + width, color)
-  end
-  def highlight_king
-    x = @x
-    y = @y
-    color = Gosu::Color::RED
-    x *= width
-    y *= width
-    if $flip
-      x = (7 - @x) * width
-      y = (7 - @y) * width
-    end
-    $window.draw_quad(x, y, color,
-                      x + width, y, color,
-                      x + width, y + width, color,
-                      x, y + width, color)
   end
 
   def draw
@@ -101,46 +53,46 @@ class Square
     light = Gosu::Color.rgba(238, 238, 210, 255)
     dark = Gosu::Color.rgba(118, 150, 86, 255)
     color = (x + y).even? ? light : dark
-    x *= width
-    y *= width
+    x *= @width
+    y *= @width
     if $flip
-      x = (7 - @x) * width
-      y = (7 - @y) * width
+      x = (7 - @x) * @width
+      y = (7 - @y) * @width
     end
-    $window.draw_quad(x, y, color,
-                      x + width, y, color,
-                      x + width, y + width, color,
-                      x, y + width, color)
+    draw_quad(x, y, color)
     if $flip
-      gx = (7 - @x) * width
-      gy = (7 - @y) * width
+      gx = (7 - @x) * @width
+      gy = (7 - @y) * @width
     else
       gx = x
       gy = y
     end
-    str = PIECES[piece] || ''
-    cx = (width - font.text_width(str)) / 2
-    px = (width - font.text_width(piece)) / 2
-    font.draw_text(piece, gx + px, gy + 15, 1, 1, 1, @color)
-    # font_x.draw_text("#{@x}#{@y}", x + cx, y, 1, 1, 1, Gosu::Color::BLACK)
-    # highlight_from if  mouse_over_square && selected
-    highlight_from if to_selected
-    highlight_from if selected
-    highlight_king if checked
+    px = (@width - @font.text_width(piece)) / 2
+    @font.draw_text(piece, gx + px, gy + 15, 1, 1, 1, @color) # draws piece on the square.
+    moved_color = Gosu::Color.rgba(246, 246, 150, 255)
+    checked_king_color = Gosu::Color.rgba(231, 53, 54, 255)
+    selected_color = Gosu::Color.rgba(27, 171, 163, 125)
+    draw_quad(x, y, moved_color) if moved
+    draw_quad(x, y, checked_king_color) if checked
+    draw_quad(x, y, selected_color) if selected
+    draw_quad(x, y, selected_color) if highlighted
+  end
+
+  def draw_quad(x, y, color)
+    $window.draw_quad(x, y, color,
+                      x + @width, y, color,
+                      x + @width, y + @width, color,
+                      x, y + @width, color)
   end
 
   def mouse_over_square
     if $flip
-      x = (7 - @x) * width
-      y = (7 - @y) * width
+      x = (7 - @x) * @width
+      y = (7 - @y) * @width
     else
-      x = @x * width
-      y = @y * width
+      x = @x * @width
+      y = @y * @width
     end
-    $window.mouse_x.between?(x, x + width - 2) && $window.mouse_y.between?(y, y + width - 2)
-  end
-
-  def ==(other)
-    x == other.x && y == other.y && piece == other.piece
+    $window.mouse_x.between?(x, x + @width - 2) && $window.mouse_y.between?(y, y + @width - 2)
   end
 end
