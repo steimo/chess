@@ -58,7 +58,7 @@ class MenuState < GameState
       $can_black_castle_right = true
       $can_black_castle_left = true
       $flip = false
-      fen = PGN::FEN.new('rnbq1bnr/pp1p1ppp/8/4k3/2p5/8/PPPP1PPP/RNBQKBNR w KQ - 0 1')
+      fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
       board = Board.new(fen)
       @play_state = PlayState.new(board)
       @button_c.text = 'Continue'
