@@ -5,7 +5,6 @@ class Move
     @board = board
     @fen = board.fen
     @position = position
-    define_en # defines x, y for en passant square.
   end
 
   def can_move
@@ -75,7 +74,8 @@ class Move
   end
 
   def can_white_cr
-    return false unless $can_white_castle_right
+    str_con = board.fen.castling.gsub(/[^[:upper:]]+/, '')
+    return false unless str_con[0] == 'K'
     return false if board.king_under_check?
     return false if king_cell_check(5, 7)
     return false unless board.square_is_empty?(5, 7)
@@ -86,7 +86,8 @@ class Move
   end
 
   def can_white_cl
-    return false unless $can_white_castle_left
+    str_con = board.fen.castling.gsub(/[^[:upper:]]+/, '')
+    return false unless str_con == 'KQ' || str_con == 'Q'
     return false if board.king_under_check?
     return false if king_cell_check(3, 7)
     return false unless board.square_is_empty?(3, 7)
@@ -98,7 +99,8 @@ class Move
   end
 
   def can_black_cr
-    return false unless $can_black_castle_right
+    str_con = board.fen.castling.gsub(/[^[:lower:]]+/, '')
+    return false unless str_con[0] == 'k'
     return false if board.king_under_check?
     return false if king_cell_check(5, 0)
     return false unless board.square_is_empty?(5, 0)
@@ -109,7 +111,8 @@ class Move
   end
 
   def can_black_cl
-    return false unless $can_black_castle_left
+    str_con = board.fen.castling.gsub(/[^[:lower:]]+/, '')
+    return false unless str_con == 'kq' || str_con == 'q'
     return false if board.king_under_check?
     return false if king_cell_check(3, 0)
     return false unless board.square_is_empty?(3, 0)
@@ -141,7 +144,7 @@ class Move
 
   def en_passant
     step = position.from.piece_color == 'w' ? 3 : 4
-    if !(position.to.x == @enx && position.to.y == @eny)
+    if !(position.to.x == board.enx && position.to.y == board.eny)
       false
     elsif position.from.y != step
       false
@@ -184,19 +187,6 @@ class Move
     end
   end
 
-  def define_en
-    en_position = board.fen.en_passant
-    pgn_board = board.fen.to_position.board
-    en_coord = pgn_board.coordinates_for(en_position)
-    if en_position == '-'
-      @enx = -1
-      @eny = -1
-    else
-      @enx = en_coord[0]
-      @eny = 7 - en_coord[1]
-    end
-  end
-
   # returns string in algebraic notation.
   def to_an_string
     return 'O-O-O' if king? && can_castle && position.abs_delta_x == 2 && position.to.x == 2
@@ -204,7 +194,7 @@ class Move
 
     piece = position.from.piece_char
     piece_str = pawn? ? '' : piece.upcase
-    if position.to.x == @enx && position.to.y == @eny && (position.to.y - position.from.y).abs == 1 && pawn? # for an en_passant notation.
+    if position.to.x == board.enx && position.to.y == board.eny && (position.to.y - position.from.y).abs == 1 && pawn? # for an en_passant notation.
       "#{piece_str}#{position.from.define_position}x#{position.to.define_position}"
     else # for basic moves.
       "#{piece_str}#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}"

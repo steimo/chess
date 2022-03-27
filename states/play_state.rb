@@ -113,31 +113,12 @@ class PlayState < GameState
       next_board.board[from.y][from.x].moved = true
       next_board.board[to.y][to.x].moved = true
       $flip = !($flip == true)
-      update_castle_flags # checks if neither the king nor the rook has previously moved.
       next_play_state = PlayState.new(next_board)
       GameState.switch(next_play_state)
       $last_move_from_x = position.from.x
       $last_move_from_y = position.from.y
       $last_move_to_x = position.to.x
       $last_move_to_y = position.to.y
-      move.check_pawn_attack # checks if an enemy pawn has just moved two squares in a single move and assigns values to the square that the enemy pawn passed.
     end
-  end
-
-  def update_castle_flags
-    piece = board.board[from.y][from.x].piece_char
-    if piece == 'K'
-      $can_white_castle_right = false
-      $can_white_castle_left = false
-    end
-    if piece == 'k'
-      $can_black_castle_right = false
-      $can_black_castle_left = false
-    end
-    $can_white_castle_left = false if piece == 'R' && from.x == 0 && from.y == 7
-    $can_white_castle_right = false if piece == 'R' && from.x == 7 && from.y == 7
-
-    $can_black_castle_left = false if piece == 'r' && from.x == 0 && from.y == 0
-    $can_black_castle_right = false if piece == 'r' && from.x == 7 && from.y == 0
   end
 end

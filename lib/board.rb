@@ -1,9 +1,11 @@
 class Board
+  attr_reader :enx, :eny
   attr_accessor :board, :fen
 
   def initialize(fen)
     @fen = fen
     @board = initialize_board
+    define_en
   end
 
   def initialize_board
@@ -26,6 +28,19 @@ class Board
 
   def update
     board.flatten.each(&:update)
+  end
+
+  def define_en
+    en_position = fen.en_passant
+    pgn_board = fen.to_position.board
+    en_coord = pgn_board.coordinates_for(en_position)
+    if en_position == '-'
+      @enx = -1
+      @eny = -1
+    else
+      @enx = en_coord[0]
+      @eny = 7 - en_coord[1]
+    end
   end
 
   def yield_squares
@@ -80,7 +95,7 @@ class Board
     # after = Board.new(fen)        # <=
     # after = after.move(position) # <=
     # after.can_eat_king          # <=
-    after = self.move(position) # <= not sure, needs testing.
+    after = move(position) # <= not sure, needs testing.
     after.can_eat_king
   end
 
