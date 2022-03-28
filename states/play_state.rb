@@ -4,11 +4,12 @@ class PlayState < GameState
   def initialize(board = Board.new)
     @board = board
     @first_click = true
-    # checks condition that occurs when a player's king is under threat of capture on the opponent's next turn.
-    board.king_under_check?
     @font = Gosu::Font.new(25, bold: true)
     @move_sound = Gosu::Sample.new('./sound/move.wav')
     @capture_sound = Gosu::Sample.new('./sound/capture.wav')
+
+    # checks condition that occurs when a player's king is under threat of capture on the opponent's next turn.
+    board.king_under_check?
   end
 
   def draw
@@ -109,16 +110,12 @@ class PlayState < GameState
       return promotion(board, move, position) if position.to.y == 7 && move.pawn? || position.to.y == 0 && move.pawn?
 
       next_board = @board.move(position)
-      position.to.piece_char == '' ? @move_sound.play : @capture_sound.play 
+      position.to.piece_char == '' ? @move_sound.play : @capture_sound.play
       next_board.board[from.y][from.x].moved = true
       next_board.board[to.y][to.x].moved = true
       $flip = !($flip == true)
       next_play_state = PlayState.new(next_board)
       GameState.switch(next_play_state)
-      $last_move_from_x = position.from.x
-      $last_move_from_y = position.from.y
-      $last_move_to_x = position.to.x
-      $last_move_to_y = position.to.y
     end
   end
 end

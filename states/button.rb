@@ -1,9 +1,11 @@
 class Button
-  attr_accessor :text
+  attr_accessor :text, :load_state_x, :load_state_y
 
-  def initialize(text, shift)
+  def initialize(text, shift, load_state_x=0, load_state_y=0)
     @text = text
     @shift = shift
+    @load_state_x = load_state_x
+    @load_state_y = load_state_y
     @font = Gosu::Font.new(45, name: 'fonts/unifont-14.0.01.ttf')
   end
 
@@ -22,11 +24,11 @@ class Button
   end
 
   def define_x
-    $window.width / 2 - @font.text_width(@text.to_s) / 2
+    $window.width / 2 - @font.text_width(@text.to_s) / 2 + @load_state_x
   end
 
   def define_y
-    $window.height / 2 - @shift - 100
+    $window.height / 2 - @shift - 100 + @load_state_y
   end
 
   def mouse_over_button

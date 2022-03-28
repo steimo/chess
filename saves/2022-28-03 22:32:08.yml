@@ -1,0 +1,72 @@
+--- !ruby/object:PGN::FEN
+board: !ruby/object:PGN::Board
+  squares:
+  - -
+    -
+    -
+    -
+    -
+    -
+    -
+    -
+  - -
+    -
+    -
+    -
+    -
+    -
+    -
+    -
+  - -
+    -
+    -
+    -
+    -
+    -
+    -
+    -
+  - -
+    -
+    -
+    -
+    -
+    -
+    -
+    -
+  - -
+    -
+    -
+    -
+    -
+    -
+    -
+    - r
+  - -
+    -
+    - B
+    - Q
+    - P
+    - q
+    -
+    -
+  - -
+    - P
+    -
+    -
+    -
+    -
+    - p
+    -
+  - - K
+    -
+    - P
+    -
+    -
+    - p
+    - k
+    -
+active: w
+castling: "-"
+en_passant: "-"
+halfmove: '3'
+fullmove: '45'

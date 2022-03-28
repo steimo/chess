@@ -5,7 +5,7 @@ class Board
   def initialize(fen)
     @fen = fen
     @board = initialize_board
-    define_en
+    define_en # defines en passant square coordinates.
   end
 
   def initialize_board

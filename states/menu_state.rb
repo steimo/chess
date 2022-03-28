@@ -1,10 +1,10 @@
 require 'singleton'
 require 'yaml'
-# require 'marshal'
+require 'fileutils'
 
 class MenuState < GameState
   include Singleton
-  attr_accessor :play_state
+  attr_accessor :play_state, :button_c
 
   def initialize
     @font = Gosu::Font.new(100, name: 'fonts/unifont-14.0.01.ttf')
@@ -52,33 +52,32 @@ class MenuState < GameState
     $window.width / 2 - font.text_width(text.to_s) / 2
   end
 
-  def save_game
-    data = []
-    File.open('./saved.yml', 'w') { |f| YAML.dump([] << @play_state.board.fen, f) }
+  def create_new_game
+    $flip = false
+    fen = PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    board = Board.new(fen)
+    @play_state = PlayState.new(board)
+    @button_c.text = 'Continue'
+    GameState.switch(@play_state)
   end
 
-  def load_game
-    saved = File.open(File.join(Dir.pwd, './saved.yml'), 'r')
-    loaded_game = YAML.unsafe_load(saved)
-    saved.close
-    board = Board.new(PGN::FEN.new(loaded_game[0].to_s))
-    $flip = board.fen == 'w'
-    state = PlayState.new(board)
-    GameState.switch(state)
+  def save_game
+    filename = Time.now.strftime('%Y-%d-%m %H:%M:%S')
+    dirname = File.dirname('chess/saves/')
+    FileUtils.mkdir_p('saves') unless File.directory?(dirname)
+    return false unless filename
+
+    dump = YAML.dump(@play_state.board.fen)
+    File.open(File.join(Dir.pwd, "/saves/#{filename}.yml"), 'w') { |file| file.write dump }
   end
 
   def button_down(id)
     $window.close if @button_q.mouse_over_button && id == Gosu::MsLeft # quit.
     GameState.switch(@play_state) if @button_c.mouse_over_button && @play_state && id == Gosu::MsLeft # continue.
     save_game if @button_s.mouse_over_button && @play_state && id == Gosu::MsLeft # save.
-    load_game if @button_l.mouse_over_button && id == Gosu::MsLeft # load.
-    if @button_ng.mouse_over_button && id == Gosu::MsLeft # new game creation.
-      $flip = false
-      fen = PGN::FEN.new('rnbq1bnr/pp1ppppp/8/2B5/K1p5/8/PPPPPkPP/RNBQ2NR w - - 0 1')
-      board = Board.new(fen)
-      @play_state = PlayState.new(board)
-      @button_c.text = 'Continue'
-      GameState.switch(@play_state)
+    if @button_l.mouse_over_button && id == Gosu::MsLeft && !Dir.empty?('../chess/saves') # load.
+      GameState.switch(LoadState.new)
     end
+    create_new_game if @button_ng.mouse_over_button && id == Gosu::MsLeft # new game creation.
   end
 end
