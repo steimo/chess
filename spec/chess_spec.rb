@@ -1,54 +1,28 @@
+require 'pgn'
 require 'gosu'
-require 'pry'
 require_relative '../lib/square'
+require_relative '../lib/position'
+require_relative '../lib/move'
 require_relative '../lib/board'
-require_relative '../lib/chess_helper'
-require_relative '../states/game_state'
-require_relative '../states/play_state'
-include ChessHelper
 
-describe PlayState do
-  context '.new' do
-    it { expect(subject.board[e4]).to eq nil }
-    it { expect(subject.board[e2]).to eq 'P' }
-    it { expect(subject.board[d1]).to eq 'Q' }
-    it { expect(subject.board[d8]).to eq 'q' }
-    it { expect(subject.turn).to eq(:white) }
-    it { expect(subject.castling).to eq('KQkq') }
-    it { expect(subject.ep).to be_nil }
-    it { expect(subject.halfmove).to eq(0) }
-    it { expect(subject.fullmove).to eq(1) }
-    it { expect(subject.king).to eq({ white: e1, black: e8 }) }
-  end
-  context '#move' do
-    context 'e4' do
-      subject { PlayState.new.move('e4') }
-      it { expect(subject.board[e4]).to eq 'P' }
-      it { expect(subject.board[e2]).to eq nil }
-      it { expect(subject.turn).to eq :black }
-      it { expect(subject.castling).to eq('KQkq') }
-      it { expect(subject.ep).to e3 }
-      it { expect(subject.halfmove).to eq(0) }
-      it { expect(subject.fullmove).to eq(1) }
-    end
-  end
+def coord(move)
+  a = (move[0]).ord - 'a'.ord # => 4
+  b = (move[1]).ord - 7 - '1'.ord # => -6
+  [a, b.abs]
 end
 
-describe Square do
-  describe '#initialize' do
-    context 'when square of a1 initialized' do
-      subject(:square) { described_class.new(0, 0) }
-      it 'returns a1' do
-        position = square.position
-        expect(position).to eq('a1')
-      end
-      context 'when square of h8 initialized' do
-        subject(:square) { described_class.new(7, 7) }
-        it 'returns h8' do
-          position = square.position
-          expect(position).to eq('h8')
-        end
-      end
+
+describe Board do
+  describe 'move' do
+    it 'should return new board' do
+      from = coord('e2')
+      to = coord('e4')
+      from_x = from[0]
+      from_y = from[1]
+      board = Board.new(PGN::FEN.new('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'))
+      position = Position.new(Square.new(from[0], from[1], '♙'), Square.new(to[0], to[1], ''))
+      move = board.move(position)
+      expect(move.fen.to_s).to eq('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
     end
   end
 end

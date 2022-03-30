@@ -2,7 +2,7 @@ class Game < Gosu::Window
   attr_accessor :state
 
   def initialize
-    super 800, 800, fullscreen: false
+    super 800, 800, fullscreen: true
     self.caption = 'Chess'
   end
 
