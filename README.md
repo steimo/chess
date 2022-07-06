@@ -6,7 +6,6 @@
 
 <h3 align="center" >This is an implementation of chess game, written in Ruby using <a href="https://github.com/gosu/gosu" alt="gosu">Gosu </a>2D game development library.</h3>
 
-<p align="center" >This project is my solution to the <a href="https://www.theodinproject.com/lessons/ruby-ruby-final-project" alt="odin">final exercise</a> of the Ruby curriculum from <a href="https://www.theodinproject.com/" alt="odin">The Odin Project.</a></p>
 <div align="center">
 <img src="screenshots/menu.png" width="30%"></img> <img src="screenshots/load.png" width="30%"></img> <img src="screenshots/moves.png" width="30%"></img> <img src="screenshots/pin.png" width="30%"></img> <img src="screenshots/en_passant.png" width="30%"></img> <img src="screenshots/castling.png" width="30%"></img>
 </div>
