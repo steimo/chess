@@ -1,16 +1,12 @@
 require 'pgn'
 require 'gosu'
-require_relative '../lib/square'
-require_relative '../lib/position'
-require_relative '../lib/move'
-require_relative '../lib/board'
+Dir['../lib/*.rb'].each { |file| require_relative file }
 
 def coord(move)
-  a = (move[0]).ord - 'a'.ord # => 4
-  b = (move[1]).ord - 7 - '1'.ord # => -6
+  a = (move[0]).ord - 'a'.ord
+  b = (move[1]).ord - 7 - '1'.ord
   [a, b.abs]
 end
-
 
 describe Board do
   describe 'move' do

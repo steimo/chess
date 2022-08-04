@@ -148,8 +148,8 @@ class Move
       false
     elsif position.from.y != step
       false
-    # elsif position.delta_x != 1  # not sure.
-    #   false
+      # elsif position.delta_x != 1  # not sure.
+      #   false
     elsif position.abs_delta_x == 1
       true
     end
@@ -160,9 +160,7 @@ class Move
   end
 
   def can_pawn_jump(step_y)
-    if position.to.piece == ' ' && (position.delta_x == 0) && (position.delta_y == 2 * step_y) && ((position.from.y == 1 || position.from.y == 6)) && (board.board[position.from.y + step_y][position.from.x].piece == ' ')
-      true
-    end
+    true if position.to.piece == ' ' && (position.delta_x == 0) && (position.delta_y == 2 * step_y) && ((position.from.y == 1 || position.from.y == 6)) && (board.board[position.from.y + step_y][position.from.x].piece == ' ')
   end
 
   def can_pawn_eat(step_y)
@@ -196,7 +194,8 @@ class Move
     piece_str = pawn? ? '' : piece.upcase
     if position.to.x == board.enx && position.to.y == board.eny && (position.to.y - position.from.y).abs == 1 && pawn? # for an en_passant notation.
       "#{piece_str}#{position.from.define_position}x#{position.to.define_position}"
-    else # for basic moves.
+    else
+      # for basic moves.
       "#{piece_str}#{position.from.define_position}#{position.to.piece == ' ' ? '' : 'x'}#{position.to.define_position}"
     end
   end
