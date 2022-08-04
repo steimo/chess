@@ -107,7 +107,9 @@ class PlayState < GameState
       # occurs when the pawn
       # moves to the rank(row) furthest
       # from its starting position and results in promotion state.
-      return promotion(board, move, position) if position.to.y == 7 && move.pawn? || position.to.y == 0 && move.pawn?
+      if position.to.y == 7 && move.pawn? || position.to.y == 0 && move.pawn?
+        return promotion(board, move, position)
+      end
 
       next_board = @board.move(position)
       position.to.piece_char == '' ? @move_sound.play : @capture_sound.play
