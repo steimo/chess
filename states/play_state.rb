@@ -1,7 +1,7 @@
 class PlayState < GameState
   attr_accessor :board, :from, :to, :first_click
 
-  def initialize(board = Board.new)
+  def initialize(board)
     @board = board
     @first_click = true
     @font = Gosu::Font.new(25, bold: true)

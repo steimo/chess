@@ -9,14 +9,10 @@ class Board
   end
 
   def initialize_board
-    position = fen.to_position
-    arr = []
-    arr << position.inspect
-    arr = arr[0].split("\n")
-    arr.shift
-    arr = arr.map(&:chars).flatten.map { |s| s == ' ' ? '' : s }.reject(&:empty?).map { |w| w == '_' ? ' ' : w }
+    arr = fen.board.inspect.split(" ").map { |w| w == '_' ? ' ' : w }
     arr.each_slice(8).to_a.map.with_index do |row, y|
-      row.map.with_index do |column, x| # column represents a piece.
+      row.map.with_index do |column, x|
+        # column represents a piece.
         Square.new(x, y, column)
       end
     end
@@ -32,7 +28,7 @@ class Board
 
   def define_en
     en_position = fen.en_passant
-    pgn_board = fen.to_position.board
+    pgn_board = fen.board
     en_coord = pgn_board.coordinates_for(en_position)
     if en_position == '-'
       @enx = -1
@@ -57,10 +53,10 @@ class Board
 
   def move(position)
     move = Move.new(self, position)
-    string = move.to_an_string                     # creates move in algebraic notation.
+    string = move.to_an_string # creates move in algebraic notation.
     position = @fen.to_position.move(string.strip) # makes move using PGN parser.
-    new = position.to_fen                          # returns new fen after making move with PGN parser.
-    Board.new(new)                                 # returns new board back to play state.
+    new = position.to_fen # returns new fen after making move with PGN parser.
+    Board.new(new) # returns new board back to play state.
   end
 
   def find_opposite_king
@@ -92,10 +88,7 @@ class Board
   end
 
   def is_check_after_move(position)
-    # after = Board.new(fen)        # <=
-    # after = after.move(position) # <=
-    # after.can_eat_king          # <=
-    after = move(position) # <= not sure, needs testing.
+    after = move(position)
     after.can_eat_king
   end
 

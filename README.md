@@ -74,7 +74,7 @@ gem install pgn
 Once the gems are installed, just clone repository and run it with Ruby in root `chess` directory:
 
 ```
-git clone https://github.com/steimz/chess
+git clone https://github.com/steimo/chess
 cd chess
 
 ruby main.rb
