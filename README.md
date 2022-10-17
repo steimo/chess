@@ -114,10 +114,6 @@ ruby main.rb
 
 * [A PGN parser and FEN generator for ruby](https://github.com/capicue/pgn)
 
-### Contact me:
-
-vladyslav.kolomiets@protonmail.com
-
 ### Contributing:
 
 Pull requests are welcome.
